@@ -22,9 +22,22 @@ async function init(): Promise<void> {
   sendButton.addEventListener("click", () => {
     void sendCurrentPage();
   });
-  optionsButton.addEventListener("click", () => {
+  optionsButton?.addEventListener("click", () => {
     chrome.runtime.openOptionsPage();
   });
+
+  // Fallback: if Settings button is missing, show an inline link
+  if (!optionsButton) {
+    const link = document.createElement("a");
+    link.textContent = "Open Settings";
+    link.href = "#";
+    link.style.cssText = "font-size:12px;color:var(--blue);display:block;margin-top:8px";
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      chrome.runtime.openOptionsPage();
+    });
+    statusEl.insertAdjacentElement("afterend", link);
+  }
 }
 
 async function sendCurrentPage(): Promise<void> {
