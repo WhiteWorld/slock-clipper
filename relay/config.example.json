@@ -1,0 +1,11 @@
+{
+  "host": "127.0.0.1",
+  "port": 9321,
+  "relaySecret": "change-me-to-a-random-local-secret",
+  "slockCliPath": "/Users/you/.slock/agents/<sharebot-agent-id>/.slock/slock",
+  "agentId": "<sharebot-agent-id>",
+  "agentTokenFile": "/Users/you/.slock/agents/<sharebot-agent-id>/.slock/agent-token",
+  "serverUrl": "https://api.slock.ai",
+  "defaultTarget": "#收藏",
+  "defaultMention": "@Reader"
+}

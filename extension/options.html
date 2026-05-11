@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Slock Clipper Settings</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="panel wide">
+      <h1>Slock Clipper Settings</h1>
+
+      <label>
+        Relay URL
+        <input id="relayUrl" type="url" placeholder="http://127.0.0.1:9321">
+      </label>
+
+      <label>
+        Relay Secret
+        <input id="relaySecret" type="password" autocomplete="off">
+      </label>
+
+      <label>
+        Default Target
+        <input id="defaultTarget" type="text" placeholder="#收藏">
+      </label>
+
+      <label>
+        Default Mention
+        <input id="defaultMention" type="text" placeholder="@Reader">
+      </label>
+
+      <button id="save" class="primary" type="button">Save</button>
+      <p id="status" role="status"></p>
+    </main>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

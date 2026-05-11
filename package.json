@@ -1,0 +1,23 @@
+{
+  "name": "slock-clipper",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Clip webpages, URLs, and text snippets into Slock channels through a local relay and dedicated agent identity.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:shared && npm run build:relay && npm run build:extension",
+    "build:shared": "tsc -p shared/tsconfig.json",
+    "build:relay": "tsc -p relay/tsconfig.json",
+    "build:extension": "tsc -p extension/tsconfig.json && node scripts/copy-extension-assets.mjs",
+    "start:relay": "node relay/dist/server.js",
+    "dev:relay": "tsx relay/src/server.ts",
+    "check": "npm run build"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.42",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}

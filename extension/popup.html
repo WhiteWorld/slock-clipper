@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Slock Clipper</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header>
+        <h1>Slock Clipper</h1>
+        <button id="open-options" type="button" title="Open settings">Settings</button>
+      </header>
+
+      <label>
+        Title
+        <input id="title" type="text" autocomplete="off">
+      </label>
+
+      <label>
+        URL
+        <input id="url" type="url" autocomplete="off">
+      </label>
+
+      <label>
+        Note
+        <textarea id="note" rows="4" placeholder="Optional note for the Slock thread"></textarea>
+      </label>
+
+      <label>
+        Target
+        <input id="target" type="text" placeholder="#收藏">
+      </label>
+
+      <button id="send" class="primary" type="button">Send to Slock</button>
+      <p id="status" role="status"></p>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
