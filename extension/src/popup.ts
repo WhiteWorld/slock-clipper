@@ -1,61 +1,64 @@
 import { getSettings } from "./settings.js";
 import { sendToRelay } from "./share.js";
 
-const titleInput = document.querySelector<HTMLInputElement>("#title")!;
-const urlInput = document.querySelector<HTMLInputElement>("#url")!;
-const noteInput = document.querySelector<HTMLTextAreaElement>("#note")!;
-const targetInput = document.querySelector<HTMLInputElement>("#target")!;
+// Grab DOM elements — fail loudly if critical ones are missing
 const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
-const sendButton = document.querySelector<HTMLButtonElement>("#send")!;
-const optionsButton = document.querySelector<HTMLButtonElement>("#open-options")!;
 
-void init();
+// Register event listeners synchronously so buttons always work
+const optionsButton = document.querySelector<HTMLButtonElement>("#open-options");
+if (optionsButton) {
+  optionsButton.addEventListener("click", () => {
+    chrome.runtime.openOptionsPage();
+  });
+}
 
-async function init(): Promise<void> {
-  const settings = await getSettings();
-  targetInput.value = settings.defaultTarget;
-
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  titleInput.value = tab?.title ?? "";
-  urlInput.value = tab?.url ?? "";
-
+const sendButton = document.querySelector<HTMLButtonElement>("#send");
+if (sendButton) {
   sendButton.addEventListener("click", () => {
     void sendCurrentPage();
   });
-  optionsButton?.addEventListener("click", () => {
-    chrome.runtime.openOptionsPage();
-  });
+}
 
-  // Fallback: if Settings button is missing, show an inline link
-  if (!optionsButton) {
-    const link = document.createElement("a");
-    link.textContent = "Open Settings";
-    link.href = "#";
-    link.style.cssText = "font-size:12px;color:var(--blue);display:block;margin-top:8px";
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      chrome.runtime.openOptionsPage();
-    });
-    statusEl.insertAdjacentElement("afterend", link);
+// Async init: fill in page title/URL from the active tab
+void init();
+
+async function init(): Promise<void> {
+  try {
+    const settings = await getSettings();
+    const targetInput = document.querySelector<HTMLInputElement>("#target");
+    if (targetInput) targetInput.value = settings.defaultTarget;
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const titleInput = document.querySelector<HTMLInputElement>("#title");
+    const urlInput = document.querySelector<HTMLInputElement>("#url");
+    if (titleInput) titleInput.value = tab?.title ?? "";
+    if (urlInput) urlInput.value = tab?.url ?? "";
+  } catch (err) {
+    setStatus("Init error: " + (err instanceof Error ? err.message : String(err)));
   }
 }
 
 async function sendCurrentPage(): Promise<void> {
+  const titleInput = document.querySelector<HTMLInputElement>("#title");
+  const urlInput = document.querySelector<HTMLInputElement>("#url");
+  const noteInput = document.querySelector<HTMLTextAreaElement>("#note");
+  const targetInput = document.querySelector<HTMLInputElement>("#target");
+
   setStatus("Sending...");
-  sendButton.disabled = true;
+  if (sendButton) sendButton.disabled = true;
   try {
     const result = await sendToRelay({
       type: "page",
-      title: titleInput.value,
-      url: urlInput.value,
-      note: noteInput.value,
-      target: targetInput.value
+      title: titleInput?.value ?? "",
+      url: urlInput?.value ?? "",
+      note: noteInput?.value ?? "",
+      target: targetInput?.value ?? "",
     });
     setStatus(`Sent${result.messageId ? `: ${result.messageId.slice(0, 8)}` : ""}`);
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "Failed to send");
   } finally {
-    sendButton.disabled = false;
+    if (sendButton) sendButton.disabled = false;
   }
 }
 
