@@ -54,7 +54,7 @@ async function sendCurrentPage(): Promise<void> {
       note: noteInput?.value ?? "",
       target: targetInput?.value ?? "",
     });
-    setStatus(`Sent${result.messageId ? `: ${result.messageId.slice(0, 8)}` : ""}`);
+    setStatus("Sent ✅");
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "Failed to send");
   } finally {
