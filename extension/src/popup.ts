@@ -8,7 +8,7 @@ const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
 const optionsButton = document.querySelector<HTMLButtonElement>("#open-options");
 if (optionsButton) {
   optionsButton.addEventListener("click", () => {
-    chrome.runtime.openOptionsPage();
+    chrome.tabs.create({ url: chrome.runtime.getURL("options.html") });
   });
 }
 
