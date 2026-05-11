@@ -17,6 +17,7 @@ const server = createServer(async (req, res) => {
     }
 
     if (req.method === "GET" && req.url === "/health") {
+      assertSecret(req);
       sendJson(res, 200, { ok: true });
       return;
     }

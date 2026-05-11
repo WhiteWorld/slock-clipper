@@ -36,6 +36,14 @@ Then load `extension/dist` through `chrome://extensions`.
 
 After editing extension files, rebuild and click "Reload" in Chrome.
 
+## Chrome storage
+
+The extension currently stores only a few settings in `chrome.storage.sync`.
+This is fine for relay URL, secret, target, and mention. If future versions add
+large template lists, channel presets, or send history, move those larger records
+to `chrome.storage.local` because `chrome.storage.sync` has small per-item and
+total quota limits.
+
 ## Release checklist
 
 - `npm run build` passes.
