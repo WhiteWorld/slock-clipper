@@ -89,7 +89,7 @@ function detectContentCategory(payload: NormalizedSharePayload): ContentCategory
 function generatePrompt(category: ContentCategory, payload: NormalizedSharePayload): string {
   switch (category) {
     case "selection":
-      return "请总结以下摘录内容，提炼核心观点。";
+      return "请仅根据上面的摘录文字进行总结，提炼核心观点。不需要访问链接获取更多内容。";
 
     case "github": {
       const isRepo = payload.url?.match(/github\.com\/[^/]+\/[^/]+$/);
