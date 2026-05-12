@@ -31,6 +31,10 @@ Important limitation: messages are sent as the configured Slock agent, not as a 
 - Quick badge feedback after context-menu sends.
 - Minimal Chrome permissions.
 
+## Screenshot
+
+![Slock Clipper popup](screenshot.png)
+
 ## Quick Start
 
 ### 1. Create a dedicated Slock agent
