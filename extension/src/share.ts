@@ -7,7 +7,6 @@ export interface ExtensionSharePayload {
   selection?: string;
   note?: string;
   target?: string;
-  mention?: string;
 }
 
 export async function sendToRelay(payload: ExtensionSharePayload): Promise<{ ok: boolean; messageId?: string; error?: string }> {
@@ -24,7 +23,6 @@ export async function sendToRelay(payload: ExtensionSharePayload): Promise<{ ok:
     },
     body: JSON.stringify({
       target: payload.target || settings.defaultTarget,
-      mention: payload.mention || settings.defaultMention,
       source: "chrome-extension",
       ...payload
     })
