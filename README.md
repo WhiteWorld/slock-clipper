@@ -33,7 +33,8 @@ Important limitation: messages are sent as the configured Slock agent, not as a 
 
 ## Screenshot
 
-![Slock Clipper popup](screenshot.png)
+![Slock Clipper popup](screenshot-save.png)
+![Slock Read](screenshot-read.png)
 
 ## Quick Start
 
