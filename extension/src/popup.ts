@@ -41,7 +41,7 @@ async function init(): Promise<void> {
 async function sendCurrentPage(): Promise<void> {
   const titleInput = document.querySelector<HTMLInputElement>("#title");
   const urlInput = document.querySelector<HTMLInputElement>("#url");
-  const noteInput = document.querySelector<HTMLTextAreaElement>("#note");
+  const noteInput = document.querySelector<HTMLInputElement>("#note");
   const targetInput = document.querySelector<HTMLInputElement>("#target");
 
   setStatus("Sending...");
