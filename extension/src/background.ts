@@ -39,17 +39,9 @@ async function handleContextMenu(info: chrome.contextMenus.OnClickData, tab?: ch
     await chrome.action.setBadgeText({ text: "✓" });
     await chrome.action.setBadgeBackgroundColor({ color: "#3fb077" });
     await chrome.action.setTitle({ title: "Slock Clipper — Sent ✓" });
-    // Also show a brief notification that auto-closes
-    await chrome.notifications.create({
-      type: "basic",
-      iconUrl: "icons/icon-128.png",
-      title: "Slock Clipper",
-      message: "Sent ✓",
-      silent: true
-    });
     setTimeout(() => {
       void chrome.action.setBadgeText({ text: "" });
-    }, 4000);
+    }, 3000);
   } catch (error) {
     const msg = error instanceof Error ? error.message : "Failed";
     await chrome.action.setBadgeText({ text: "✗" });
