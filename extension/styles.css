@@ -7,7 +7,7 @@
 
 body {
   margin: 0;
-  min-width: 340px;
+  min-width: 360px;
 }
 
 .panel {
@@ -67,6 +67,11 @@ button.primary {
   color: white;
 }
 
+button.primary:disabled {
+  background: #93c5a3;
+  cursor: wait;
+}
+
 button:not(.primary) {
   background: #edf7f1;
   color: #2d8a5e;
@@ -77,4 +82,9 @@ button:not(.primary) {
   font-size: 12px;
   min-height: 16px;
   margin: 0;
+  transition: color 0.2s;
+}
+
+#send:disabled {
+  opacity: 0.7;
 }
