@@ -35,17 +35,17 @@ async function handleContextMenu(info: chrome.contextMenus.OnClickData, tab?: ch
       });
     }
 
-    await notify("Sent to Slock");
+    // Badge feedback on extension icon
+    await chrome.action.setBadgeText({ text: "✓" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#3fb077" });
+    setTimeout(() => {
+      void chrome.action.setBadgeText({ text: "" });
+    }, 2000);
   } catch (error) {
-    await notify(error instanceof Error ? error.message : "Failed to send to Slock");
+    await chrome.action.setBadgeText({ text: "✗" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#e53e3e" });
+    setTimeout(() => {
+      void chrome.action.setBadgeText({ text: "" });
+    }, 3000);
   }
-}
-
-async function notify(message: string): Promise<void> {
-  await chrome.notifications.create({
-    type: "basic",
-    iconUrl: "icons/icon-128.png",
-    title: "Slock Clipper",
-    message
-  });
 }
