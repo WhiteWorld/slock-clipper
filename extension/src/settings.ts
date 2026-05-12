@@ -2,14 +2,12 @@ export interface Settings {
   relayUrl: string;
   relaySecret: string;
   defaultTarget: string;
-  defaultMention: string;
 }
 
 export const defaultSettings: Settings = {
   relayUrl: "http://127.0.0.1:9321",
   relaySecret: "",
-  defaultTarget: "#收藏",
-  defaultMention: "@Reader"
+  defaultTarget: "#收藏"
 };
 
 export async function getSettings(): Promise<Settings> {
@@ -17,8 +15,7 @@ export async function getSettings(): Promise<Settings> {
   return {
     relayUrl: String(stored.relayUrl ?? defaultSettings.relayUrl).replace(/\/+$/, ""),
     relaySecret: String(stored.relaySecret ?? ""),
-    defaultTarget: String(stored.defaultTarget ?? defaultSettings.defaultTarget),
-    defaultMention: String(stored.defaultMention ?? defaultSettings.defaultMention)
+    defaultTarget: String(stored.defaultTarget ?? defaultSettings.defaultTarget)
   };
 }
 
