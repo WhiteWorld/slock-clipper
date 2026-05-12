@@ -1,21 +1,123 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import type { NormalizedSharePayload } from "../../shared/dist/schema.js";
 
-type ContentCategory = "selection" | "github" | "article" | "default";
+// ---- Config ----
 
-export function renderShareMessage(payload: NormalizedSharePayload, defaultMention?: string): string {
-  const lines: string[] = [];
-  const label = labelFor(payload.type);
-  const mention = payload.mention ?? defaultMention;
+interface TemplateDef {
+  label: string;
+  prompt: string;
+  promptRepo?: string;
+}
+
+interface TemplatesConfig {
+  selection: TemplateDef;
+  github: TemplateDef;
+  article: TemplateDef;
+  note: TemplateDef;
+  code: TemplateDef;
+  default: TemplateDef;
+}
+
+const EN_DEFAULTS: TemplatesConfig = {
+  selection: {
+    label: "📌 Selected Text",
+    prompt:
+      "Please summarize the selected text above. Extract only the core points without accessing the linked page.",
+  },
+  github: {
+    label: "📌 GitHub",
+    promptRepo:
+      "Please analyze this GitHub repository:\n- Purpose and tech stack\n- Architecture and design highlights\n- Whether it's worth following",
+    prompt: "Please analyze this GitHub link and summarize the key information.",
+  },
+  article: {
+    label: "📌 Article",
+    prompt:
+      "Please read and summarize this article:\n- Core points (3-5)\n- Author's position and methodology\n- Actionable insights or takeaways",
+  },
+  note: {
+    label: "📌 Quick Note",
+    prompt: "Please organize the key points from the note above.",
+  },
+  code: {
+    label: "📌 Code Snippet",
+    prompt: "Please analyze the functionality and design of this code.",
+  },
+  default: {
+    label: "📌 Webpage",
+    prompt: "Please read and summarize this content. Extract 3-5 key points.",
+  },
+};
+
+let _cached: TemplatesConfig | null = null;
+
+function loadTemplates(): TemplatesConfig {
+  if (_cached) return _cached;
+  try {
+    const raw = readFileSync(resolve("relay/templates.json"), "utf8");
+    // Resolve path relative to project root (where relay is invoked)
+    const user = JSON.parse(raw) as Partial<TemplatesConfig>;
+    _cached = { ...EN_DEFAULTS, ...user };
+  } catch {
+    _cached = EN_DEFAULTS;
+  }
+  return _cached;
+}
+
+// ---- Content detection ----
+
+type ContentCategory = keyof TemplatesConfig;
+
+function detectContentCategory(payload: NormalizedSharePayload): ContentCategory {
+  if (payload.type === "selection" || payload.selection) return "selection";
+  if (payload.type === "note") return "note";
+  if (payload.type === "code") return "code";
+
+  const url = (payload.url ?? "").toLowerCase();
+
+  if (
+    url.includes("github.com/") &&
+    !url.includes("/search") &&
+    !url.includes("/topics") &&
+    !url.includes("/marketplace")
+  ) {
+    return "github";
+  }
+
+  if (
+    url.includes("medium.com") ||
+    url.includes("zhihu.com") ||
+    /mp\.weixin\.qq\.com/.test(url) ||
+    url.includes("sspai.com") ||
+    url.includes("ruanyifeng.com") ||
+    url.includes("blog.") ||
+    /\/(blog|post|article|posts)\//.test(url) ||
+    url.includes("arxiv.org") ||
+    url.includes("podcasts.apple.com") ||
+    url.includes("xiaoyuzhoufm.com")
+  ) {
+    return "article";
+  }
+
+  return "default";
+}
+
+// ---- Render ----
+
+export function renderShareMessage(
+  payload: NormalizedSharePayload,
+  defaultMention?: string,
+): string {
+  const tpl = loadTemplates();
   const category = detectContentCategory(payload);
+  const def = tpl[category];
+  const mention = payload.mention ?? defaultMention;
 
-  lines.push(`${label}`);
+  const lines: string[] = [def.label];
 
-  if (payload.title) {
-    lines.push(`标题：${payload.title}`);
-  }
-  if (payload.url) {
-    lines.push(`链接：${payload.url}`);
-  }
+  if (payload.title) lines.push(`标题：${payload.title}`);
+  if (payload.url) lines.push(`链接：${payload.url}`);
   lines.push("");
 
   if (payload.selection) {
@@ -33,93 +135,15 @@ export function renderShareMessage(payload: NormalizedSharePayload, defaultMenti
   lines.push(`来源：${payload.source}`);
 
   if (mention) {
+    const isRepo =
+      category === "github" &&
+      payload.url?.match(/github\.com\/[^/]+\/[^/]+$/);
+    const prompt = isRepo && def.promptRepo ? def.promptRepo : def.prompt;
     lines.push("");
-    const prompt = generatePrompt(category, payload);
     lines.push(`${mention} ${prompt}`);
   }
 
   return lines.join("\n").trimEnd() + "\n";
-}
-
-function detectContentCategory(payload: NormalizedSharePayload): ContentCategory {
-  // Selection always gets its own treatment
-  if (payload.type === "selection" || payload.selection) {
-    return "selection";
-  }
-
-  const url = payload.url ?? "";
-  const lowerUrl = url.toLowerCase();
-
-  // GitHub repos, issues, PRs
-  if (
-    lowerUrl.includes("github.com/") &&
-    !lowerUrl.includes("/search") &&
-    !lowerUrl.includes("/topics") &&
-    !lowerUrl.includes("/marketplace")
-  ) {
-    return "github";
-  }
-
-  // Technical article / blog sites
-  if (
-    lowerUrl.includes("medium.com") ||
-    lowerUrl.includes("zhihu.com") ||
-    lowerUrl.match(/mp\.weixin\.qq\.com/) ||
-    lowerUrl.includes("sspai.com") ||
-    lowerUrl.includes("ruanyifeng.com") ||
-    lowerUrl.includes("blog.") ||
-    lowerUrl.match(/\/(blog|post|article|posts)\//)
-  ) {
-    return "article";
-  }
-
-  // arXiv papers
-  if (lowerUrl.includes("arxiv.org")) {
-    return "article";
-  }
-
-  // RSS / podcast
-  if (lowerUrl.includes("podcasts.apple.com") || lowerUrl.includes("xiaoyuzhoufm.com")) {
-    return "article";
-  }
-
-  return "default";
-}
-
-function generatePrompt(category: ContentCategory, payload: NormalizedSharePayload): string {
-  switch (category) {
-    case "selection":
-      return "请仅根据上面的摘录文字进行总结，提炼核心观点。不需要访问链接获取更多内容。";
-
-    case "github": {
-      const isRepo = payload.url?.match(/github\.com\/[^/]+\/[^/]+$/);
-      if (isRepo) {
-        return "请分析这个 GitHub 项目，从以下角度总结：\n- 功能定位与技术栈\n- 核心架构与设计亮点\n- 是否值得深入关注";
-      }
-      return "请分析这个 GitHub 链接的内容，总结关键信息。";
-    }
-
-    case "article":
-      return "请阅读并总结这篇文章：\n- 核心观点（3-5 条）\n- 作者立场和方法论\n- 可迁移的实践或启发";
-
-    case "default":
-    default:
-      return "请阅读并总结这篇内容，提炼 3-5 个要点。";
-  }
-}
-
-function labelFor(type: NormalizedSharePayload["type"]): string {
-  switch (type) {
-    case "selection":
-      return "📌 网页摘录";
-    case "note":
-      return "📌 快速笔记";
-    case "code":
-      return "📌 代码片段";
-    case "page":
-    default:
-      return "📌 网页收藏";
-  }
 }
 
 function blockquote(text: string): string {

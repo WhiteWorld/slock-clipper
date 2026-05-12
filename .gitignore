@@ -4,5 +4,6 @@ dist/
 *.log
 .env
 relay/config.json
+relay/templates.json
 extension/dist/
 .DS_Store
