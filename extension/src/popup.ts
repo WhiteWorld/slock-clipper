@@ -3,6 +3,7 @@ import { sendToRelay } from "./share.js";
 
 // Grab DOM elements — fail loudly if critical ones are missing
 const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
+const healthEl = document.querySelector<HTMLSpanElement>("#health")!;
 const sendButton = document.querySelector<HTMLButtonElement>("#send")!;
 const optionsButton = document.querySelector<HTMLButtonElement>("#open-options")!;
 
@@ -41,8 +42,29 @@ async function init(): Promise<void> {
     // Auto-focus title for quick editing
     titleInput?.focus();
     titleInput?.select();
+
+    // Health check
+    await checkHealth(settings.relayUrl, settings.relaySecret);
   } catch (err) {
     setStatus("Init error: " + (err instanceof Error ? err.message : String(err)));
+  }
+}
+
+async function checkHealth(relayUrl: string, relaySecret: string): Promise<void> {
+  try {
+    const res = await fetch(`${relayUrl}/health`, {
+      headers: { "x-slock-clipper-secret": relaySecret }
+    });
+    if (res.ok) {
+      healthEl.className = "health health-ok";
+      healthEl.title = "Relay connected";
+    } else {
+      healthEl.className = "health health-err";
+      healthEl.title = `Relay returned ${res.status}`;
+    }
+  } catch {
+    healthEl.className = "health health-err";
+    healthEl.title = "Relay unreachable";
   }
 }
 
@@ -57,7 +79,7 @@ async function sendCurrentPage(): Promise<void> {
   sendButton.textContent = "Sending...";
 
   try {
-    const result = await sendToRelay({
+    await sendToRelay({
       type: "page",
       title: titleInput?.value?.trim() ?? "",
       url: urlInput?.value?.trim() ?? "",

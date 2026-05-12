@@ -31,6 +31,24 @@ h1 {
   margin: 0 0 4px;
 }
 
+.health {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.health-ok {
+  background: #3fb077;
+}
+
+.health-err {
+  background: #e53e3e;
+}
+
 label {
   display: grid;
   gap: 6px;
