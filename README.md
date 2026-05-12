@@ -1,5 +1,7 @@
 # Slock Clipper
 
+[![CI](https://github.com/WhiteWorld/slock-clipper/actions/workflows/ci.yml/badge.svg)](https://github.com/WhiteWorld/slock-clipper/actions/workflows/ci.yml)
+
 Slock Clipper is a local-first Chrome extension for clipping webpages, URLs, and selected text into Slock channels through a dedicated bot/agent identity.
 
 It is designed for workflows like:
