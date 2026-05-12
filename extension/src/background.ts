@@ -35,17 +35,28 @@ async function handleContextMenu(info: chrome.contextMenus.OnClickData, tab?: ch
       });
     }
 
-    // Badge feedback on extension icon
+    // Show feedback on extension icon
     await chrome.action.setBadgeText({ text: "✓" });
     await chrome.action.setBadgeBackgroundColor({ color: "#3fb077" });
+    await chrome.action.setTitle({ title: "Slock Clipper — Sent ✓" });
+    // Also show a brief notification that auto-closes
+    await chrome.notifications.create({
+      type: "basic",
+      iconUrl: "icons/icon-128.png",
+      title: "Slock Clipper",
+      message: "Sent ✓",
+      silent: true
+    });
     setTimeout(() => {
       void chrome.action.setBadgeText({ text: "" });
-    }, 2000);
+    }, 4000);
   } catch (error) {
+    const msg = error instanceof Error ? error.message : "Failed";
     await chrome.action.setBadgeText({ text: "✗" });
     await chrome.action.setBadgeBackgroundColor({ color: "#e53e3e" });
+    await chrome.action.setTitle({ title: `Slock Clipper — ${msg}` });
     setTimeout(() => {
       void chrome.action.setBadgeText({ text: "" });
-    }, 3000);
+    }, 5000);
   }
 }
