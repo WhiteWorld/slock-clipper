@@ -57,6 +57,16 @@ Copy the example config and edit `relay/config.json`:
 
 Only these four fields are required. The relay derives `slockCliPath` and `agentTokenFile` automatically from `~/.slock/agents/<agentId>/`.
 
+Optional overrides (add to `relay/config.json` if defaults don't fit):
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `host` | `127.0.0.1` | Bind address |
+| `port` | `9321` | Listen port |
+| `serverUrl` | `https://api.slock.ai` | Slock API server |
+| `slockCliPath` | auto from `agentId` | Override CLI path |
+| `agentTokenFile` | auto from `agentId` | Override token file path |
+
 ### 4. Start relay
 
 ```bash
