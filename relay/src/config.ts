@@ -1,12 +1,13 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { homedir } from "node:os";
 
 export interface RelayConfig {
   host: string;
   port: number;
   relaySecret: string;
-  slockCliPath: string;
   agentId: string;
+  slockCliPath: string;
   agentTokenFile: string;
   serverUrl: string;
   defaultTarget: string;
@@ -15,18 +16,21 @@ export interface RelayConfig {
 
 export function loadConfig(): RelayConfig {
   const configPath = resolve(process.env.SLOCK_CLIPPER_CONFIG ?? "relay/config.json");
-  const raw = JSON.parse(readFileSync(configPath, "utf8")) as Partial<RelayConfig>;
+  const raw = JSON.parse(readFileSync(configPath, "utf8")) as Record<string, unknown>;
+
+  const agentId: string = required(raw.agentId, "agentId");
+  const agentDir = resolve(homedir(), ".slock", "agents", agentId);
 
   const config: RelayConfig = {
-    host: raw.host ?? "127.0.0.1",
+    host: stringValue(raw.host, "127.0.0.1"),
     port: numberValue(raw.port, 9321),
     relaySecret: required(raw.relaySecret, "relaySecret"),
-    slockCliPath: required(raw.slockCliPath, "slockCliPath"),
-    agentId: required(raw.agentId, "agentId"),
-    agentTokenFile: required(raw.agentTokenFile, "agentTokenFile"),
-    serverUrl: raw.serverUrl ?? "https://api.slock.ai",
+    agentId,
+    slockCliPath: stringValue(raw.slockCliPath, resolve(agentDir, ".slock", "slock")),
+    agentTokenFile: stringValue(raw.agentTokenFile, resolve(agentDir, ".slock", "agent-token")),
+    serverUrl: stringValue(raw.serverUrl, "https://api.slock.ai"),
     defaultTarget: required(raw.defaultTarget, "defaultTarget"),
-    defaultMention: raw.defaultMention
+    defaultMention: stringValue(raw.defaultMention, "")
   };
 
   if (config.host !== "127.0.0.1" && config.host !== "localhost") {
@@ -45,6 +49,13 @@ function required(value: unknown, name: string): string {
     throw new Error(`Missing required config field: ${name}`);
   }
   return value.trim();
+}
+
+function stringValue(value: unknown, fallback: string): string {
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+  return fallback;
 }
 
 function numberValue(value: unknown, fallback: number): number {
