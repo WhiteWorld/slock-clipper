@@ -112,14 +112,26 @@ At least one of `title`, `url`, `selection`, or `note` is required.
 
 The relay detects content type from the URL and generates an appropriate prompt:
 
-| Content Type | Prompt |
-|-------------|--------|
-| GitHub repo | Analyze project: features, tech stack, architecture, whether worth following |
-| Article / Blog | Summarize with 3-5 key points, author's position, actionable takeaways |
-| Selection | Summarize only the selected text (does not visit the URL) |
-| Default | Read and summarize with 3-5 key points |
+| Content Type | Detection | Example Prompt |
+|-------------|-----------|---------------|
+| GitHub repo | `github.com/user/repo` | Analyze project: features, tech stack, architecture |
+| GitHub link | Issues / PRs / discussions | Summarize key information |
+| Article / Blog | Medium, Zhihu, WeChat, arXiv, etc. | Summarize 3-5 key points, methodology, takeaways |
+| Selection | User-selected text | Summarize selected text only (no URL fetch) |
+| Note / Code | Explicit type | Organize key points / Analyze code |
+| Default | All other URLs | Read and summarize with 3-5 key points |
 
-The mention (e.g. `@ReaderBot`) is always controlled by the relay config, never by the extension.
+### Customizing Templates
+
+To customize prompts and labels, copy and edit `relay/templates.json`:
+
+```bash
+cp relay/templates.example.json relay/templates.json
+```
+
+Each category can override `label` and `prompt`. For GitHub repos, override `promptRepo` to use a different prompt than other GitHub links. Write in any language — the relay reads this file at startup.
+
+If `relay/templates.json` is missing, the relay uses English defaults. The mention (e.g. `@ReaderBot`) and target channel are always controlled by relay config, never by the extension.
 
 ## Development
 
