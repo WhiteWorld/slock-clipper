@@ -26,6 +26,7 @@ Important limitation: messages are sent as the configured Slock agent, not as a 
 - Popup share: send the current tab title, URL, and optional note.
 - Context menu: right-click to send a page or selected text.
 - Smart templates: prompts adapt based on content type (GitHub repos, articles, selections, general pages).
+- Full-text extraction: optionally capture page body text as a local backup file so the agent can fall back to it when a link is inaccessible (paywalls, login-required pages).
 - Local relay with secret-based protection.
 - Keyboard shortcut: `Ctrl/Cmd + Enter` to send from popup.
 - Quick badge feedback after context-menu sends.
@@ -60,7 +61,7 @@ Copy the example config and edit `relay/config.json`:
 {
   "relaySecret": "replace-with-a-random-local-secret",
   "agentId": "<sharebot-agent-id>",
-  "defaultTarget": "#ladder",
+  "defaultTarget": "#clips",
   "defaultMention": "@ReaderBot"
 }
 ```
@@ -101,7 +102,8 @@ curl -X POST http://127.0.0.1:9321/share \
 5. Open extension options and set:
    - Relay URL: `http://127.0.0.1:9321`
    - Relay Secret: same as `relay/config.json`
-   - Default Channel: for example `#ladder`
+   - Default Channel: for example `#clips`
+   - Extract page text: enable if you want a local full-text backup sent alongside the URL (useful for paywalled or login-required pages)
 
 ## Share API
 
@@ -113,10 +115,11 @@ The relay accepts `POST /share` with a `x-slock-clipper-secret` header and a JSO
 | `title` | string | Page title |
 | `url` | string | Page URL |
 | `selection` | string | Selected text |
+| `text` | string | Full page body text (up to 8000 chars); saved as a local file and referenced in the agent prompt as a fallback |
 | `note` | string | Optional note |
 | `target` | string | Channel override (falls back to relay config) |
 
-At least one of `title`, `url`, `selection`, or `note` is required.
+At least one of `title`, `url`, `selection`, `text`, or `note` is required.
 
 ## Smart Templates
 
@@ -145,7 +148,15 @@ Use `globalPromptSuffix` to append a shared instruction to every prompt — for 
 
 ```json
 {
-  "globalPromptSuffix": "请将结果以 Markdown 文件形式保存到 ~/notes/clips/ 目录。"
+  "globalPromptSuffix": "Save the result as a Markdown file under ~/notes/clips/."
+}
+```
+
+Use `textFallbackPrefix` to customize the message prepended to the local backup file path when full-text extraction is enabled (defaults to `"If the link is inaccessible, use the local backup:"`):
+
+```json
+{
+  "textFallbackPrefix": "If the URL is paywalled, read the local file instead:"
 }
 ```
 
