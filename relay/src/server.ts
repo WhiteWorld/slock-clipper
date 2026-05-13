@@ -1,10 +1,15 @@
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { resolve } from "node:path";
 import { normalizeSharePayload } from "../../shared/dist/schema.js";
 import { loadConfig } from "./config.js";
 import { sendSlockMessage } from "./slock-cli.js";
 import { renderShareMessage } from "./templates.js";
 
 const config = loadConfig();
+const TEXT_DIR = resolve("/tmp/slock-clipper");
+
+try { mkdirSync(TEXT_DIR, { recursive: true }); } catch { /* ok */ }
 
 const server = createServer(async (req, res) => {
   try {
@@ -31,7 +36,8 @@ const server = createServer(async (req, res) => {
     const body = await readJson(req);
     const payload = normalizeSharePayload(body);
     const target = payload.target ?? config.defaultTarget;
-    const message = renderShareMessage(payload, config.defaultMention);
+    const textPath = payload.text ? saveTextFile(payload.text) : undefined;
+    const message = renderShareMessage(payload, config.defaultMention, textPath);
     const result = await sendSlockMessage(config, target, message);
 
     if (!result.ok) {
@@ -45,6 +51,13 @@ const server = createServer(async (req, res) => {
     sendJson(res, 400, { ok: false, error: message });
   }
 });
+
+function saveTextFile(text: string): string {
+  const ts = new Date().toISOString().replace(/[:.]/g, "-");
+  const filePath = resolve(TEXT_DIR, `clipping-${ts}.txt`);
+  writeFileSync(filePath, text, "utf8");
+  return filePath;
+}
 
 server.listen(config.port, config.host, () => {
   console.log(`Slock Clipper relay listening on http://${config.host}:${config.port}`);

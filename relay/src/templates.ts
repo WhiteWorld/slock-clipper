@@ -14,6 +14,7 @@ type ContentCategory = "selection" | "github" | "article" | "note" | "code" | "d
 
 interface TemplatesConfig extends Record<ContentCategory, TemplateDef> {
   globalPromptSuffix?: string;
+  textFallbackPrefix?: string;
 }
 
 const EN_DEFAULTS: TemplatesConfig = {
@@ -103,6 +104,7 @@ function detectContentCategory(payload: NormalizedSharePayload): ContentCategory
 export function renderShareMessage(
   payload: NormalizedSharePayload,
   defaultMention?: string,
+  textPath?: string,
 ): string {
   const tpl = loadTemplates();
   const category = detectContentCategory(payload);
@@ -134,9 +136,15 @@ export function renderShareMessage(
       category === "github" &&
       payload.url?.match(/github\.com\/[^/]+\/[^/]+$/);
     const basePrompt = isRepo && def.promptRepo ? def.promptRepo : def.prompt;
-    const prompt = tpl.globalPromptSuffix
-      ? `${basePrompt}\n${tpl.globalPromptSuffix}`
-      : basePrompt;
+    const suffix = [
+      tpl.globalPromptSuffix,
+      textPath
+        ? `${tpl.textFallbackPrefix ?? "If the link is inaccessible, use the local backup:"} ${textPath}`
+        : undefined,
+    ]
+      .filter(Boolean)
+      .join("\n");
+    const prompt = suffix ? `${basePrompt}\n${suffix}` : basePrompt;
     lines.push("");
     lines.push(`${mention} ${prompt}`);
   }

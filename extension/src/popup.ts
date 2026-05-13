@@ -73,16 +73,30 @@ async function sendCurrentPage(): Promise<void> {
   const urlInput = document.querySelector<HTMLInputElement>("#url");
   const noteInput = document.querySelector<HTMLInputElement>("#note");
   const targetInput = document.querySelector<HTMLInputElement>("#target");
-
   setStatus("⏳ Sending...");
   sendButton.disabled = true;
   sendButton.textContent = "Sending...";
 
   try {
+    const settings = await getSettings();
+    let text: string | undefined;
+    if (settings.extractText) {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab?.id) {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.body.innerText.slice(0, 8000),
+        });
+        text = results[0]?.result?.trim() || undefined;
+        if (!text) setStatus("⚠️ Text extraction returned empty");
+      }
+    }
+
     await sendToRelay({
       type: "page",
       title: titleInput?.value?.trim() ?? "",
       url: urlInput?.value?.trim() ?? "",
+      text,
       note: noteInput?.value?.trim() ?? "",
       target: targetInput?.value?.trim() ?? "",
     });

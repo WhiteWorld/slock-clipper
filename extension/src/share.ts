@@ -5,6 +5,7 @@ export interface ExtensionSharePayload {
   title?: string;
   url?: string;
   selection?: string;
+  text?: string;
   note?: string;
   target?: string;
 }

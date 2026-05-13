@@ -12,6 +12,6 @@
     "type": "module"
   },
   "options_page": "options.html",
-  "permissions": ["activeTab", "contextMenus", "storage", "notifications"],
+  "permissions": ["activeTab", "contextMenus", "storage", "notifications", "scripting"],
   "host_permissions": ["http://127.0.0.1:9321/*"]
 }

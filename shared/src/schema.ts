@@ -5,6 +5,7 @@ export interface SharePayload {
   title?: string;
   url?: string;
   selection?: string;
+  text?: string;
   note?: string;
   target?: string;
   mention?: string;
@@ -16,6 +17,7 @@ export interface NormalizedSharePayload {
   title?: string;
   url?: string;
   selection?: string;
+  text?: string;
   note?: string;
   target?: string;
   mention?: string;
@@ -32,13 +34,14 @@ export function normalizeSharePayload(input: unknown): NormalizedSharePayload {
   const title = cleanOptionalString(payload.title, 300);
   const url = cleanOptionalString(payload.url, 2048);
   const selection = cleanOptionalString(payload.selection, 8000);
+  const text = cleanOptionalString(payload.text, 8000);
   const note = cleanOptionalString(payload.note, 4000);
   const target = cleanOptionalString(payload.target, 120);
   const mention = cleanOptionalString(payload.mention, 120);
   const source = cleanOptionalString(payload.source, 80) ?? "chrome-extension";
 
-  if (!title && !url && !selection && !note) {
-    throw new Error("At least one of title, url, selection, or note is required");
+  if (!title && !url && !selection && !text && !note) {
+    throw new Error("At least one of title, url, selection, text, or note is required");
   }
 
   if (target && !isValidTarget(target)) {
@@ -49,7 +52,7 @@ export function normalizeSharePayload(input: unknown): NormalizedSharePayload {
     throw new Error("mention must look like @agentName");
   }
 
-  return { type, title, url, selection, note, target, mention, source };
+  return { type, title, url, selection, text, note, target, mention, source };
 }
 
 function parseType(value: unknown): ShareType {

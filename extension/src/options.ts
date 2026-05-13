@@ -3,6 +3,7 @@ import { getSettings, saveSettings } from "./settings.js";
 const relayUrlInput = document.querySelector<HTMLInputElement>("#relayUrl")!;
 const relaySecretInput = document.querySelector<HTMLInputElement>("#relaySecret")!;
 const defaultTargetInput = document.querySelector<HTMLInputElement>("#defaultTarget")!;
+const extractTextInput = document.querySelector<HTMLInputElement>("#extractText")!;
 const saveButton = document.querySelector<HTMLButtonElement>("#save")!;
 const statusEl = document.querySelector<HTMLParagraphElement>("#status")!;
 
@@ -13,6 +14,7 @@ async function init(): Promise<void> {
   relayUrlInput.value = settings.relayUrl;
   relaySecretInput.value = settings.relaySecret;
   defaultTargetInput.value = settings.defaultTarget;
+  extractTextInput.checked = settings.extractText;
 
   saveButton.addEventListener("click", () => {
     void save();
@@ -23,7 +25,8 @@ async function save(): Promise<void> {
   await saveSettings({
     relayUrl: relayUrlInput.value.trim().replace(/\/+$/, ""),
     relaySecret: relaySecretInput.value.trim(),
-    defaultTarget: defaultTargetInput.value.trim()
+    defaultTarget: defaultTargetInput.value.trim(),
+    extractText: extractTextInput.checked,
   });
   statusEl.textContent = "Saved.";
 }
