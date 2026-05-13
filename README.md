@@ -141,6 +141,14 @@ cp relay/templates.example.json relay/templates.json
 
 Each category can override `label` and `prompt`. For GitHub repos, override `promptRepo` to use a different prompt than other GitHub links. Write in any language — the relay reads this file at startup.
 
+Use `globalPromptSuffix` to append a shared instruction to every prompt — for example, to ask the agent to save results to a specific location:
+
+```json
+{
+  "globalPromptSuffix": "请将结果以 Markdown 文件形式保存到 ~/notes/clips/ 目录。"
+}
+```
+
 If `relay/templates.json` is missing, the relay uses English defaults. The mention (e.g. `@ReaderBot`) and target channel are always controlled by relay config, never by the extension.
 
 ## Development

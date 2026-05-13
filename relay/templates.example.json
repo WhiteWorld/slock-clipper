@@ -23,5 +23,6 @@
   "default": {
     "label": "📌 网页收藏",
     "prompt": "请阅读并总结这篇内容，提炼 3-5 个要点。"
-  }
+  },
+  "globalPromptSuffix": "请将结果以 Markdown 文件形式保存到 ~/notes/clips/ 目录。"
 }

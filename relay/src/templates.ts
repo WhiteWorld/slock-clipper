@@ -10,13 +10,10 @@ interface TemplateDef {
   promptRepo?: string;
 }
 
-interface TemplatesConfig {
-  selection: TemplateDef;
-  github: TemplateDef;
-  article: TemplateDef;
-  note: TemplateDef;
-  code: TemplateDef;
-  default: TemplateDef;
+type ContentCategory = "selection" | "github" | "article" | "note" | "code" | "default";
+
+interface TemplatesConfig extends Record<ContentCategory, TemplateDef> {
+  globalPromptSuffix?: string;
 }
 
 const EN_DEFAULTS: TemplatesConfig = {
@@ -66,8 +63,6 @@ function loadTemplates(): TemplatesConfig {
 }
 
 // ---- Content detection ----
-
-type ContentCategory = keyof TemplatesConfig;
 
 function detectContentCategory(payload: NormalizedSharePayload): ContentCategory {
   if (payload.type === "selection" || payload.selection) return "selection";
@@ -138,7 +133,10 @@ export function renderShareMessage(
     const isRepo =
       category === "github" &&
       payload.url?.match(/github\.com\/[^/]+\/[^/]+$/);
-    const prompt = isRepo && def.promptRepo ? def.promptRepo : def.prompt;
+    const basePrompt = isRepo && def.promptRepo ? def.promptRepo : def.prompt;
+    const prompt = tpl.globalPromptSuffix
+      ? `${basePrompt}\n${tpl.globalPromptSuffix}`
+      : basePrompt;
     lines.push("");
     lines.push(`${mention} ${prompt}`);
   }
